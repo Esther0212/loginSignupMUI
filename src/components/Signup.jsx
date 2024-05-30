@@ -8,12 +8,13 @@ import {
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "./supabaseClient";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(4),
-    marginTop: theme.spacing(4),
+    marginTop: theme.spacing(11),
   },
   form: {
     display: "flex",
@@ -38,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Signup() {
   const classes = useStyles();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -79,19 +81,24 @@ export default function Signup() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      email &&
-      password &&
-      confirmPassword &&
-      !Boolean(emailError) &&
-      !Boolean(passwordError) &&
-      !Boolean(confirmPasswordError)
-    ) {
-      alert("Account created successfully");
+    try {
+      const { user, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) {
+        alert(error.message);
+      } else {
+        alert("Account created successfully");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Sign up error:", error.message);
     }
   };
+
   return (
     <Container maxWidth="xs">
       <Paper className={classes.paper} elevation={3}>

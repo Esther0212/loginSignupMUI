@@ -8,12 +8,13 @@ import {
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "./supabaseClient";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(4),
-    marginTop: theme.spacing(4),
+    marginTop: theme.spacing(11),
   },
   form: {
     display: "flex",
@@ -38,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Login() {
   const classes = useStyles();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -66,6 +68,22 @@ export default function Login() {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (email && password && !Boolean(emailError) && !Boolean(passwordError)) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        alert(error.message);
+      } else {
+        alert("Login successful");
+        navigate("/dashboard");
+      }
+    }
+  };
+
   return (
     <Container maxWidth="xs">
       <Paper className={classes.paper} elevation={3}>
@@ -78,7 +96,7 @@ export default function Login() {
         >
           Login
         </Typography>
-        <form className={classes.form}>
+        <form className={classes.form} onSubmit={handleSubmit}>
           <TextField
             label="Email"
             variant="outlined"
